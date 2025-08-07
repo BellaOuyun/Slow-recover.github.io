@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暴力催促者</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: normal;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+        
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #fff;
+            color: #fff;
+            font-size: 18px;
+            padding: 10px 0;
+            outline: none;
+        }
+        
+        input::placeholder {
+            color: #666;
+        }
+        
+        .response {
+            margin-top: 40px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .steps {
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+        
+        .step {
+            margin: 10px 0;
+        }
+        
+        .ascii {
+            font-family: monospace;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.2;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>暴力催促者</h1>
+        <input type="text" 
+               id="taskInput" 
+               placeholder="输入你一直拖延的事..." 
+               autocomplete="off">
+        <div id="response" class="response"></div>
+    </div>
+
+    <script>
+        // 话术库
+        const responses = {
+            '减肥': {
+                intro: "减肥？说了多久了？三个月？半年？",
+                steps: [
+                    "现在，立刻站起来",
+                    "做10个深蹲",
+                    "做完回来打个勾"
+                ],
+                outro: "别想太多。就10个。\n现在。\n立刻。\n站起来。",
+                ascii: `
+     o
+    /|\\
+    / \\  → 动起来！
+                `
+            },
+            '学习': {
+                intro: "又是"我要学习"？你收藏的教程都几个G了吧？",
+                steps: [
+                    "关掉这个网页",
+                    "打开你要学的东西",
+                    "学10分钟，就10分钟"
+                ],
+                outro: "不要做计划了。\n不要找最优资源了。\n就10分钟。\n现在开始。",
+                ascii: `
+     o
+    /|\\  
+   _/ \\  → 去！
+                `
+            },
+            '早起': {
+                intro: "早起？你的闹钟已经被你虐待多少次了？",
+                steps: [
+                    "今晚10点关手机",
+                    "是的，10点",
+                    "闹钟放到够不着的地方"
+                ],
+                outro: "别定5点了。\n先从7点开始。\n能做到再说。",
+                ascii: `
+    zzz
+     o     醒醒！
+    /|\\  
+    / \\
+                `
+            },
+            '工作': {
+                intro: "找工作？刷招聘网站不叫找工作，那叫看热闹。",
+                steps: [
+                    "打开招聘网站",
+                    "投一份简历，就一份",
+                    "不要优化了，现在就投"
+                ],
+                outro: "完美的简历不存在。\n完美的时机也不存在。\n存在的只有现在。\n投。",
+                ascii: `
+     o
+    /|\\  → 去投！
+    / \\
+                `
+            },
+            'default': {
+                intro: "又来了？又是一个宏大的计划？",
+                steps: [
+                    "把你那个目标砍掉90%",
+                    "找出能在5分钟内完成的第一步",
+                    "现在就做这一步"
+                ],
+                outro: "别想太远。\n别要太多。\n就第一步。\n现在。",
+                ascii: `
+     o
+    /|\\  
+    / \\  → 别想了，做！
+                `
+            }
+        };
+
+        // 关键词匹配
+        function getResponse(input) {
+            const text = input.toLowerCase();
+            if (text.includes('减肥') || text.includes('瘦') || text.includes('运动')) {
+                return responses['减肥'];
+            }
+            if (text.includes('学') || text.includes('看书') || text.includes('课程')) {
+                return responses['学习'];
+            }
+            if (text.includes('早起') || text.includes('起床') || text.includes('早睡')) {
+                return responses['早起'];
+            }
+            if (text.includes('工作') || text.includes('简历') || text.includes('面试')) {
+                return responses['工作'];
+            }
+            return responses['default'];
+        }
+
+        // 处理输入
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value.trim()) {
+                const response = getResponse(this.value);
+                const responseDiv = document.getElementById('response');
+                
+                // 构建回复
+                let html = `<div>${response.intro}</div>`;
+                html += '<div class="steps">';
+                response.steps.forEach((step, i) => {
+                    html += `<div class="step">${i + 1}. ${step}</div>`;
+                });
+                html += '</div>';
+                html += `<div>${response.outro}</div>`;
+                if (response.ascii) {
+                    html += `<pre class="ascii">${response.ascii}</pre>`;
+                }
+                
+                responseDiv.innerHTML = html;
+                responseDiv.style.opacity = '0';
+                setTimeout(() => {
+                    responseDiv.style.opacity = '1';
+                }, 10);
+                
+                // 清空输入框
+                this.value = '';
+            }
+        });
+
+        // 页面加载时聚焦
+        window.onload = () => {
+            document.getElementById('taskInput').focus();
+        };
+    </script>
+</body>
+</html>
